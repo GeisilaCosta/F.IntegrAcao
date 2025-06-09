@@ -1,7 +1,7 @@
 # F.refugio - Plataforma de Conexão para Refugiados, ONGs e Voluntários
 
 [![Backend](https://img.shields.io/badge/backend-Java%20SpringBoot-blue)](https://github.com/GeisilaCosta/B.IntegrAcao.git)
-[![Frontend](https://img.shields.io/badge/frontend-React%20Vite-brightgreen)](https://github.com/GeisilaCosta/B.refugio-frontend)
+[![Frontend](https://img.shields.io/badge/frontend-React%20Vite-brightgreen)](https://github.com/GeisilaCosta/F.IntegrAcao.git)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
