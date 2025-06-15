@@ -22,7 +22,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-secondary text-white py-5 mt-5">
+    <footer className="py-5  mt-5 bg-black" >
       <Container>
         <Row className="g-4">
           {/* Brand and Description */}
@@ -34,7 +34,8 @@ const Footer = () => {
               </div>
               <span className="text-primary fs-4 fw-bold">IntegrAção</span>
             </div>
-            <p className="text-muted mb-3">
+            {/* <p className="text-muted mb-3"> */}
+            <p className="text-secondary mb-3">
               {t('footer.description')}
             </p>
             <div className="d-flex gap-2">
@@ -61,7 +62,7 @@ const Footer = () => {
                 <li key={link.key} className="mb-2">
                   <a 
                     href={link.href} 
-                    className="text-muted text-decoration-none"
+                    className="text-secondary text-decoration-none"
                     style={{ transition: 'color 0.3s ease' }}
                     onMouseEnter={(e) => e.target.style.color = '#2563eb'}
                     onMouseLeave={(e) => e.target.style.color = '#6c757d'}
@@ -76,10 +77,10 @@ const Footer = () => {
           {/* Help Types */}
           <Col lg={3} md={6}>
             <h6 className="text-primary mb-3">Tipos de Ajuda</h6>
-            <ul className="list-unstyled">
+            <ul className="list-unstyled ">
               {['housing', 'job', 'health', 'education', 'legal'].map((type) => (
-                <li key={type} className="mb-2">
-                  <span className="text-muted">{t(`helpType.${type}`)}</span>
+                <li key={type} className="mb-2 text-secondary">
+                  <span className="text-secondary">{t(`helpType.${type}`)}</span>
                 </li>
               ))}
             </ul>
@@ -89,15 +90,15 @@ const Footer = () => {
           <Col lg={3} md={6}>
             <h6 className="text-primary mb-3">{t('footer.contact')}</h6>
             <div className="d-flex flex-column gap-2">
-              <div className="d-flex align-items-center gap-2 text-muted">
+              <div className="d-flex align-items-center gap-2 text-secondary">
                 <Mail size={16} />
                 <span>contato@integracao.com</span>
               </div>
-              <div className="d-flex align-items-center gap-2 text-muted">
+              <div className="d-flex align-items-center gap-2 text-secondary">
                 <Phone size={16} />
                 <span>+55 (11) 9999-9999</span>
               </div>
-              <div className="d-flex align-items-center gap-2 text-muted">
+              <div className="d-flex align-items-center gap-2 text-secondary">
                 <MapPin size={16} />
                 <span>São Paulo, Brasil</span>
               </div>
@@ -110,22 +111,22 @@ const Footer = () => {
         {/* Bottom Section */}
         <Row className="align-items-center">
           <Col md={4}>
-            <img src="public/Logo loja de semijoia simples e circular minimalista verde-escuro (1).png" className="img-fluid" style={{ maxWidth: '100px' }} alt="" />
+          <img src="public/Logo loja de semijoia simples e circular minimalista verde-escuro (1).png" className="img-fluid " style={{ maxWidth: '70px' }} alt="" />
           </Col>
           <Col md={4}>
-            <p className="text-muted mb-0">
+            <p className="text-secondary mb-0">
              © 2025 IntegrAção. Desenvolvido Por Geisila Costa {t('footer.rights')}
             </p>
           </Col>
           <Col md={4} className="text-md-end">
             <div className="d-flex justify-content-md-end gap-3 mt-3 mt-md-0">
-              <a href="#" className="text-muted text-white text-decoration-none small">
+              <a href="#" className="text-secondary text-decoration-none small">
                 Política de Privacidade
               </a>
-              <a href="#" className="text-muted text-decoration-none small">
+              <a href="#" className="text-secondary text-decoration-none small">
                 Termos de Uso
               </a>
-              <a href="#" className="text-muted text-decoration-none small">
+              <a href="#" className="text-secondary text-decoration-none small">
                 Cookies
               </a>
             </div>
