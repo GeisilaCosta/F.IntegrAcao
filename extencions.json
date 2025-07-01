@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-json",
+    "ms-vscode.vscode-eslint",
+    "ms-vscode.vscode-css-peek",
+    "ritwickdey.liveserver",
+    "ms-vscode.vscode-react-native"
+  ]
+}

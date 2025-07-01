@@ -1,0 +1,18 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "files.associations": {
+    "*.jsx": "javascriptreact"
+  },
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "css.validate": false,
+  "scss.validate": false,
+  "typescript.preferences.importModuleSpecifier": "relative"
+}
