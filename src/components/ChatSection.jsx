@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
-import { Send, User, Bot, Smile } from 'lucide-react';
+import { Send, User, Bot, Smile, MessageCircle } from 'lucide-react';
 
 const ChatSection = () => {
   const [messages, setMessages] = useState([
@@ -69,96 +70,244 @@ const ChatSection = () => {
     });
   };
 
+  const messageVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 20,
+      scale: 0.8
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.8,
+      transition: {
+        duration: 0.2
+      }
+    }
+  };
+
+  const typingVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
+  const chatContainerVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
     <section className="py-5 bg-light">
       <Container>
-        <Row className="justify-content-center">
-          <Col lg={8}>
-            <div className="text-center mb-4">
-              <h2 className="display-6 fw-bold mb-3">Chat de Suporte</h2>
-              <p className="lead text-muted">
-                Converse conosco e tire suas dúvidas sobre a plataforma
-              </p>
-            </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <Row className="justify-content-center">
+            <Col lg={8}>
+              <div className="text-center mb-4">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="d-inline-block mb-3"
+                >
+                  <div className="bg-primary rounded-circle p-3">
+                    <MessageCircle className="text-white" size={32} />
+                  </div>
+                </motion.div>
+                
+                <motion.h2 
+                  className="display-6 fw-bold mb-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                >
+                  Chat de Suporte
+                </motion.h2>
+                
+                <motion.p 
+                  className="lead text-muted"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                >
+                  Converse conosco e tire suas dúvidas sobre a plataforma
+                </motion.p>
+              </div>
 
-            <Card className="chat-container shadow-sm">
-              <div className="chat-messages">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`message ${message.sender === 'user' ? 'sent' : 'received'}`}
+              <motion.div
+                variants={chatContainerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                <Card className="chat-container shadow-sm">
+                  <div className="chat-messages">
+                    <AnimatePresence>
+                      {messages.map((message) => (
+                        <motion.div
+                          key={message.id}
+                          variants={messageVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="exit"
+                          className={`message ${message.sender === 'user' ? 'sent' : 'received'}`}
+                        >
+                          <div className="d-flex align-items-start gap-2 mb-2">
+                            <motion.div 
+                              className={`rounded-circle p-2 ${
+                                message.sender === 'user' ? 'bg-primary' : 'bg-secondary'
+                              }`}
+                              whileHover={{ scale: 1.1 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {message.sender === 'user' ? (
+                                <User className="text-white" size={16} />
+                              ) : (
+                                <Bot className="text-white" size={16} />
+                              )}
+                            </motion.div>
+                            <div className="flex-grow-1">
+                              <div className="fw-medium small text-muted mb-1">
+                                {message.sender === 'user' ? 'Você' : 'Suporte IntegrAção'}
+                              </div>
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                              >
+                                {message.text}
+                              </motion.div>
+                              <div className="small text-muted mt-1">
+                                {formatTime(message.timestamp)}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                    
+                    <AnimatePresence>
+                      {isTyping && (
+                        <motion.div 
+                          className="message received"
+                          variants={typingVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                        >
+                          <div className="d-flex align-items-center gap-2">
+                            <div className="rounded-circle p-2 bg-secondary">
+                              <Bot className="text-white" size={16} />
+                            </div>
+                            <div className="typing-indicator">
+                              <motion.span
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                              />
+                              <motion.span
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                              />
+                              <motion.span
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                              />
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  <motion.div 
+                    className="chat-input"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
                   >
-                    <div className="d-flex align-items-start gap-2 mb-2">
-                      <div className={`rounded-circle p-2 ${
-                        message.sender === 'user' ? 'bg-primary' : 'bg-secondary'
-                      }`}>
-                        {message.sender === 'user' ? (
-                          <User className="text-white" size={16} />
-                        ) : (
-                          <Bot className="text-white" size={16} />
-                        )}
+                    <Form onSubmit={handleSendMessage}>
+                      <div className="d-flex gap-2">
+                        <motion.div
+                          className="flex-grow-1"
+                          whileFocus={{ scale: 1.02 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Form.Control
+                            type="text"
+                            placeholder="Digite sua mensagem..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            className="border-0 bg-light"
+                          />
+                        </motion.div>
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            type="submit"
+                            variant="primary"
+                            className="d-flex align-items-center gap-2"
+                            disabled={!newMessage.trim() || isTyping}
+                          >
+                            <motion.div
+                              animate={!newMessage.trim() ? {} : { x: [0, 5, 0] }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                            >
+                              <Send size={16} />
+                            </motion.div>
+                          </Button>
+                        </motion.div>
                       </div>
-                      <div className="flex-grow-1">
-                        <div className="fw-medium small text-muted mb-1">
-                          {message.sender === 'user' ? 'Você' : 'Suporte IntegrAção'}
-                        </div>
-                        <div>{message.text}</div>
-                        <div className="small text-muted mt-1">
-                          {formatTime(message.timestamp)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                
-                {isTyping && (
-                  <div className="message received">
-                    <div className="d-flex align-items-center gap-2">
-                      <div className="rounded-circle p-2 bg-secondary">
-                        <Bot className="text-white" size={16} />
-                      </div>
-                      <div className="typing-indicator">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
-              </div>
+                    </Form>
+                  </motion.div>
+                </Card>
+              </motion.div>
 
-              <div className="chat-input">
-                <Form onSubmit={handleSendMessage}>
-                  <div className="d-flex gap-2">
-                    <Form.Control
-                      type="text"
-                      placeholder="Digite sua mensagem..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      className="border-0 bg-light"
-                    />
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      className="d-flex align-items-center gap-2"
-                      disabled={!newMessage.trim() || isTyping}
-                    >
-                      <Send size={16} />
-                    </Button>
-                  </div>
-                </Form>
-              </div>
-            </Card>
-
-            <div className="text-center mt-3">
-              <small className="text-muted">
-                💡 Este é um chat de demonstração. Em produção, seria integrado com um sistema de chat real.
-              </small>
-            </div>
-          </Col>
-        </Row>
+              <motion.div 
+                className="text-center mt-3"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.8 }}
+              >
+                <small className="text-muted">
+                  💡 Este é um chat de demonstração. Em produção, seria integrado com um sistema de chat real.
+                </small>
+              </motion.div>
+            </Col>
+          </Row>
+        </motion.div>
       </Container>
 
       <style jsx>{`
@@ -174,26 +323,6 @@ const ChatSection = () => {
           height: 8px;
           border-radius: 50%;
           background-color: #6c757d;
-          animation: typing 1.4s infinite ease-in-out;
-        }
-        
-        .typing-indicator span:nth-child(1) {
-          animation-delay: -0.32s;
-        }
-        
-        .typing-indicator span:nth-child(2) {
-          animation-delay: -0.16s;
-        }
-        
-        @keyframes typing {
-          0%, 80%, 100% {
-            transform: scale(0.8);
-            opacity: 0.5;
-          }
-          40% {
-            transform: scale(1);
-            opacity: 1;
-          }
         }
       `}</style>
     </section>
