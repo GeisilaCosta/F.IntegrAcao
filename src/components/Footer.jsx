@@ -111,11 +111,19 @@ const Footer = () => {
         {/* Bottom Section */}
         <Row className="align-items-center">
           <Col md={4}>
-          <img src="public/Logo loja de semijoia simples e circular minimalista verde-escuro (1).png" className="img-fluid " style={{ maxWidth: '70px' }} alt="" />
-          </Col>
-          <Col md={4}>
+          <img src="public/Logo loja de semijoia simples e circular minimalista verde-escuro (1).png" className="img-fluid " style={{ maxWidth: '80px', marginLeft: '60px' }} alt="" />
             <p className="text-secondary mb-0">
-             © 2025 IntegrAção. Desenvolvido Por Geisila Costa {t('footer.rights')}
+             Desenvolvido Por Geisila Costa
+            </p>
+          </Col>
+          {/* <Col md={3}>
+            <p className="text-secondary mb-0">
+             Desenvolvido Por Geisila Costa
+            </p>
+          </Col> */}
+           <Col md={4}>
+            <p className="text-secondary mb-0">
+             © 2025 IntegrAção. {t('footer.rights')}
             </p>
           </Col>
           <Col md={4} className="text-md-end">
