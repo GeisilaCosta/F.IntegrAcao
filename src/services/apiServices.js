@@ -1,5 +1,7 @@
 import API_CONFIG, { apiRequest } from '../config/api';
 
+
+
 // Serviços de Autenticação
 export const authService = {
   login: async (credentials) => {

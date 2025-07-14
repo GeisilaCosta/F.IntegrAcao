@@ -1,14 +1,13 @@
 // Configurações da API para integração com backend
 const API_CONFIG = {
-  // URL base do backend Spring Boot
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
-  
+  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+
   // Endpoints da API
   ENDPOINTS: {
     // Autenticação
     AUTH: {
       LOGIN: '/auth/login',
-      REGISTER: '/auth/register',
+      REGISTER: '/auth/registro',
       REFRESH: '/auth/refresh',
       LOGOUT: '/auth/logout'
     },
