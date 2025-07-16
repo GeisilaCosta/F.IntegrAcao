@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './i18n';
 
-// Import components
+// Modais e páginas
+import AuthModal from './components/AuthModal';
+import PrivateRoute from './components/PrivateRoute';
+import ChatIntegration from './components/ChatIntegration';
+
+
+// Landing page componentes
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import StatsSection from './components/StatsSection';
@@ -13,8 +20,12 @@ import ChartsSection from './components/ChartsSection';
 import ChatSection from './components/ChatSection';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
-import AuthModal from './components/AuthModal';
+
+// Páginas protegidas
 import Dashboard from './components/Dashboard';
+import AdminPanel from './components/AdminPanel';
+import PainelVulneravel from './components/PainelVulneravel';
+import PainelApoiador from './components/PainelApoiador';
 
 function App() {
   const { t } = useTranslation();
@@ -22,10 +33,9 @@ function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    // Verificar se usuário está logado
     const token = localStorage.getItem('authToken');
     const userInfo = localStorage.getItem('userInfo');
-    
+
     if (token && userInfo) {
       try {
         setUser(JSON.parse(userInfo));
@@ -48,17 +58,10 @@ function App() {
     setUser(null);
   };
 
-  // Se usuário está logado, mostrar dashboard
-  if (user) {
-    return (
-      <div className="App">
-        <Dashboard user={user} onLogout={handleLogout} />
-      </div>
-    );
-  }
+  const isAuthenticated = !!user;
 
-  // Se não está logado, mostrar landing page
-  return (
+  // Landing page renderizada em "/"
+  const LandingPageView = () => (
     <div className="App">
       <Header onShowAuth={() => setShowAuthModal(true)} />
       <main>
@@ -70,12 +73,39 @@ function App() {
         <ContactSection />
       </main>
       <Footer />
-   <AuthModal
+      <AuthModal
         show={showAuthModal}
         onHide={() => setShowAuthModal(false)}
         onAuthSuccess={handleAuthSuccess}
       />
     </div>
+  );
+
+  return (
+    <Router>
+      <Routes>
+        {/* Página inicial */}
+        <Route path="/" element={<LandingPageView />} />
+        <Route path="/unauthorized" element={<div className="p-5 text-center"><h4>Acesso não autorizado</h4></div>} />
+
+        {/* Rotas protegidas para usuários autenticados */}
+        <Route element={<PrivateRoute isAuthenticated={isAuthenticated} />}>
+          <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/chat" element={<ChatIntegration />} />
+          <Route path="/painel-vulneravel" element={<PainelVulneravel />} />
+          <Route path="/painel-apoiador" element={<PainelApoiador />} />
+
+        </Route>
+
+        {/* Rotas restritas para administradores */}
+        <Route element={<PrivateRoute isAuthenticated={isAuthenticated} allowedRoles={['ADMINISTRADOR']} />}>
+          <Route path="/admin" element={<AdminPanel />} />
+        </Route>
+
+        {/* Rota fallback */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
 }
 

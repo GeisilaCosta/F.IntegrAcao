@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, Modal, Tab, Tabs } from 'react-bootstrap';
-import { User, Mail, Lock, UserPlus, LogIn, Eye, EyeOff } from 'lucide-react';
+import {
+  Container, Row, Col, Card, Form, Button, Alert, Modal, Tab, Tabs
+} from 'react-bootstrap';
+import {
+  User, Mail, Lock, UserPlus, LogIn, Eye, EyeOff
+} from 'lucide-react';
 import { authService } from '../services/apiServices';
+import { userService } from '../services/apiServices';
+import { useNavigate } from 'react-router-dom';
+
 
 const AuthModal = ({ show, onHide, onAuthSuccess }) => {
   const [activeTab, setActiveTab] = useState('login');
@@ -11,7 +18,7 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
     nome: '',
     telefone: '',
     endereco: '',
-    tipoUsuario: 'VULNERAVEL'
+    tipoUsuario: 'PESSOA_VULNERABILIDADE' // corrige alinhamento com backend
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,39 +27,46 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const navigate = useNavigate();
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const response = await authService.login({
-        email: formData.email,
-        senha: formData.senha
-      });
+  try {
+    const response = await authService.login({
+      email: formData.email,
+      senha: formData.senha
+    });
 
-      // Salvar token no localStorage
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('userInfo', JSON.stringify(response.userInfo));
+    localStorage.setItem('authToken', response.token);
 
-      setSuccess('Login realizado com sucesso!');
-      setTimeout(() => {
-        onAuthSuccess(response);
-        onHide();
-      }, 1000);
+    setSuccess('Login realizado com sucesso!');
+    setTimeout(() => {
+      onAuthSuccess(response);
+      onHide();
 
-    } catch (error) {
-      setError('Email ou senha incorretos. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      // Redirecionamento com base no tipo
+      if (response.tipo === 'PESSOA_VULNERABILIDADE') {
+        navigate('/painel-vulneravel');
+      } else if (response.tipo === 'APOIADOR_VOLUNTARIO') {
+        navigate('/painel-apoiador');
+      } else {
+        navigate('/painel-geral'); // Fallback, se quiser
+      }
+    }, 1000);
+  } catch (error) {
+    setError('Email ou senha incorretos. Tente novamente.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -66,15 +80,17 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
         senha: formData.senha,
         telefone: formData.telefone,
         endereco: formData.endereco,
-        tipoUsuario: formData.tipoUsuario
+        tipo: formData.tipoUsuario // o backend espera "tipo", não "tipoUsuario"
       });
 
       setSuccess('Cadastro realizado com sucesso! Faça login para continuar.');
       setTimeout(() => {
         setActiveTab('login');
-        setFormData(prev => ({ ...prev, nome: '', telefone: '', endereco: '' }));
+        setFormData(prev => ({
+          ...prev,
+          nome: '', telefone: '', endereco: ''
+        }));
       }, 2000);
-
     } catch (error) {
       setError('Erro ao criar conta. Verifique os dados e tente novamente.');
     } finally {
@@ -89,16 +105,14 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
       nome: '',
       telefone: '',
       endereco: '',
-      tipoUsuario: 'VULNERAVEL'
+      tipoUsuario: 'PESSOA_VULNERABILIDADE'
     });
     setError('');
     setSuccess('');
   };
 
   useEffect(() => {
-    if (show) {
-      resetForm();
-    }
+    if (show) resetForm();
   }, [show]);
 
   return (
@@ -117,6 +131,7 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
           onSelect={(k) => setActiveTab(k)}
           className="mb-4"
         >
+          {/* Login Tab */}
           <Tab eventKey="login" title={
             <span><LogIn size={16} className="me-2" />Entrar</span>
           }>
@@ -124,10 +139,7 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
               <Row>
                 <Col md={12}>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      <Mail size={16} className="me-2" />
-                      Email
-                    </Form.Label>
+                    <Form.Label><Mail size={16} className="me-2" />Email</Form.Label>
                     <Form.Control
                       type="email"
                       name="email"
@@ -140,10 +152,7 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
                 </Col>
                 <Col md={12}>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      <Lock size={16} className="me-2" />
-                      Senha
-                    </Form.Label>
+                    <Form.Label><Lock size={16} className="me-2" />Senha</Form.Label>
                     <div className="position-relative">
                       <Form.Control
                         type={showPassword ? 'text' : 'password'}
@@ -166,18 +175,14 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
                 </Col>
               </Row>
               <div className="d-grid">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  disabled={loading}
-                >
+                <Button type="submit" variant="primary" size="lg" disabled={loading}>
                   {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
               </div>
             </Form>
           </Tab>
 
+          {/* Cadastro Tab */}
           <Tab eventKey="register" title={
             <span><UserPlus size={16} className="me-2" />Cadastrar</span>
           }>
@@ -185,10 +190,7 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      <User size={16} className="me-2" />
-                      Nome Completo
-                    </Form.Label>
+                    <Form.Label><User size={16} className="me-2" />Nome Completo</Form.Label>
                     <Form.Control
                       type="text"
                       name="nome"
@@ -201,10 +203,7 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      <Mail size={16} className="me-2" />
-                      Email
-                    </Form.Label>
+                    <Form.Label><Mail size={16} className="me-2" />Email</Form.Label>
                     <Form.Control
                       type="email"
                       name="email"
@@ -230,10 +229,7 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>
-                      <Lock size={16} className="me-2" />
-                      Senha
-                    </Form.Label>
+                    <Form.Label><Lock size={16} className="me-2" />Senha</Form.Label>
                     <Form.Control
                       type="password"
                       name="senha"
@@ -259,30 +255,26 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
                   </Form.Group>
                 </Col>
                 <Col md={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Tipo de Usuário</Form.Label>
-                    <Form.Select
-                      name="tipoUsuario"
-                      value={formData.tipoUsuario}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="VULNERAVEL">Pessoa em Vulnerabilidade</option>
-                      <option value="APOIADOR">Apoiador/Voluntário</option>
-                    </Form.Select>
-                    <Form.Text className="text-muted">
-                      Escolha "Pessoa em Vulnerabilidade" se precisa de ajuda, ou "Apoiador" se quer ajudar outros.
-                    </Form.Text>
-                  </Form.Group>
-                </Col>
+  <Form.Group className="mb-3">
+    <Form.Label>Tipo de Usuário</Form.Label>
+    <Form.Select
+      name="tipo" // ← nome deve ser "tipo" para bater com o backend
+      value={formData.tipo}
+      onChange={handleInputChange}
+      required
+    >
+      <option value="">Selecione seu perfil</option>
+      <option value="PESSOA_VULNERABILIDADE">Pessoa em Vulnerabilidade</option>
+      <option value="APOIADOR_VOLUNTARIO">Apoiador/Voluntário</option>
+    </Form.Select>
+    <Form.Text className="text-muted">
+      Escolha "Pessoa em Vulnerabilidade" se precisa de ajuda, ou "Apoiador" se quer ajudar outros.
+    </Form.Text>
+  </Form.Group>
+</Col>
               </Row>
               <div className="d-grid">
-                <Button
-                  type="submit"
-                  variant="success"
-                  size="lg"
-                  disabled={loading}
-                >
+                <Button type="submit" variant="success" size="lg" disabled={loading}>
                   {loading ? 'Criando conta...' : 'Criar Conta'}
                 </Button>
               </div>

@@ -203,3 +203,37 @@ export const adminService = {
     });
   }
 };
+
+export const pedidoService = {
+  listarMeusPedidos: async () => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch('/api/pedidos/meus', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return await response.json();
+  },
+
+  listarPedidosDisponiveis: async () => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch('/api/pedidos/disponiveis', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return await response.json();
+  }
+};
+
+export const avaliacaoService = {
+  avaliacoesRecebidas: async () => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch('/api/avaliacoes/minhas', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return await response.json();
+  }
+};
