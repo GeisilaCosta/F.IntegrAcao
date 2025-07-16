@@ -222,9 +222,9 @@ const HeroSection = ({ onShowAuth }) => {
           animate={{ x: [-50, 50, -50] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         >
-          <path d="M0,0V46.29c47.79,22.2..." opacity=".25" />
+          {/* <path d="M0,0V46.29c47.79,22.2..." opacity=".25" />
           <path d="M0,0V15.81C13,36.92..." opacity=".5" />
-          <path d="M0,0V5.63C149.93,59..." />
+          <path d="M0,0V5.63C149.93,59..." /> */}
         </motion.svg>
       </div>
     </section>

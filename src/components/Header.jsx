@@ -18,6 +18,7 @@ const Header = ({ onShowAuth }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };

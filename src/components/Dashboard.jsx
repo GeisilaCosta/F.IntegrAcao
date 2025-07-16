@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Form, Modal, Alert } from 'react-bootstrap';
 import { Plus, Search, Filter, MapPin, Clock, User, Heart, MessageCircle } from 'lucide-react';
 import { offerService, requestService, applicationService } from '../services/apiServices';
+import UserProfile from './UserProfile';
+import CreateOfferModal from './CreateOfferModal';
+import CreateRequestModal from './CreateRequestModal';
+
+
 
 const Dashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('offers');
@@ -203,6 +208,7 @@ const Dashboard = ({ user, onLogout }) => {
           <div className="d-flex justify-content-between align-items-center">
             <div>
               <h2>Bem-vindo, {user.nome}!</h2>
+              <UserProfile user={user} onUpdate={(updatedUser) => setUser(updatedUser)} />
               <p className="text-muted mb-0">
                 {user.tipoUsuario === 'VULNERAVEL' ? 
                   'Encontre ajuda para suas necessidades' : 
@@ -290,6 +296,23 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         </Col>
       </Row>
+
+      {user.tipoUsuario === 'APOIADOR_VOLUNTARIO' ? (
+  <CreateOfferModal
+    show={showCreateModal}
+    onHide={() => setShowCreateModal(false)}
+    userId={user.id}
+    onSuccess={loadData}
+  />
+) : (
+  <CreateRequestModal
+    show={showCreateModal}
+    onHide={() => setShowCreateModal(false)}
+    userId={user.id}
+    onSuccess={loadData}
+  />
+)}
+
 
       {/* Conteúdo das Tabs */}
       <Row>
