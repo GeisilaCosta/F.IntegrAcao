@@ -81,7 +81,8 @@ const HeroSection = () => {
               {/* Floating elements */}
               <div className="position-absolute top-0 start-0 translate-middle">
                 <div className="bg-secondary rounded-circle p-3 animate-pulse-custom">
-                  <span className="fs-4">💡</span>
+                  {/* <span className="fs-4">💡</span> */}
+                  <span className="fs-4">❤️</span> 
                 </div>
               </div>
               <div className="position-absolute top-0 end-0 translate-middle-y">
