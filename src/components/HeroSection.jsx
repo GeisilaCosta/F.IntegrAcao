@@ -140,12 +140,13 @@ const HeroSection = ({ onShowAuth }) => {
                   <div className="text-center">
                     <motion.div 
                       className="bg-white bg-opacity-20 rounded-circle p-4 mb-3 mx-auto" 
-                      style={{ width: '120px', height: '120px' }}
+                      style={{ width: '160px', height: '160px' }}
                       variants={pulseVariants}
                       animate="animate"
                     >
                       <div className="d-flex align-items-center justify-content-center h-100">
-                        <span className="display-1">🤝</span>
+                        {/* <span className="display-1">🤝</span> */}
+                         <span className="display-1"><img src=".\public\logo1IntegrAcao.png" alt="logo"  style={{ width: '140px', height: '150px' }}/></span>
                       </div>
                     </motion.div>
 
