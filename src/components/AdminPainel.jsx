@@ -1,61 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Table, Tabs, Tab, Button, Badge } from 'react-bootstrap';
-import { adminService, offerService, requestService } from '../services/apiServices';
+import {
+  Container, Row, Col, Card, Table, Tabs, Tab, Button, Badge, Spinner
+} from 'react-bootstrap';
 import { Shield, Users, FileWarning, Filter } from 'lucide-react';
+import AdminDashboardStats from './AdminDashboardStats';
+import { adminService, offerService, requestService } from '../services/apiServices';
 
-const AdminPanel = () => {
+const AdminPainel = () => {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [offers, setOffers] = useState([]);
   const [requests, setRequests] = useState([]);
   const [activeTab, setActiveTab] = useState('usuarios');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
-    fetchUsers();
-    fetchOffers();
-    fetchRequests();
+    const carregarPainel = async () => {
+      try {
+        const [estatisticas, listaUsuarios, listaOfertas, listaPedidos] = await Promise.all([
+          adminService.getStatistics(),
+          adminService.getUsers(),
+          offerService.getOffers(),
+          requestService.getRequests()
+        ]);
+        setStats(estatisticas);
+        setUsers(listaUsuarios);
+        setOffers(listaOfertas);
+        setRequests(listaPedidos);
+      } catch (error) {
+        console.error("Erro ao carregar dados do painel:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarPainel();
   }, []);
 
-  const fetchStats = async () => {
-    const data = await adminService.getStatistics();
-    setStats(data);
-  };
-
-  const fetchUsers = async () => {
-    const userList = await adminService.getUsers();
-    setUsers(userList);
-  };
-
-  const fetchOffers = async () => {
-    const data = await offerService.getOffers();
-    setOffers(data);
-  };
-
-  const fetchRequests = async () => {
-    const data = await requestService.getRequests();
-    setRequests(data);
-  };
-
-  const handleModerate = async (contentId, action) => {
+  const handleModerate = async (id, action) => {
     try {
-      await adminService.moderateContent(contentId, action);
-      fetchUsers();
-      fetchOffers();
-      fetchRequests();
-    } catch (err) {
-      console.error('Erro ao moderar:', err);
+      await adminService.moderateContent(id, action);
+      // Atualiza os dados após moderação
+      const [updatedUsers, updatedOffers, updatedRequests] = await Promise.all([
+        adminService.getUsers(),
+        offerService.getOffers(),
+        requestService.getRequests()
+      ]);
+      setUsers(updatedUsers);
+      setOffers(updatedOffers);
+      setRequests(updatedRequests);
+    } catch (error) {
+      console.error("Erro ao moderar conteúdo:", error);
     }
   };
 
-  const getBadgeColor = (type) => {
-    const map = {
-      'APOIADOR_VOLUNTARIO': 'success',
-      'PESSOA_VULNERABILIDADE': 'info',
-      'ADMINISTRADOR': 'dark'
-    };
-    return map[type] || 'secondary';
-  };
+  const getBadgeColor = (type) => ({
+    'APOIADOR_VOLUNTARIO': 'success',
+    'PESSOA_VULNERABILIDADE': 'info',
+    'ADMINISTRADOR': 'dark'
+  }[type] || 'secondary');
+
+  if (loading) {
+    return (
+      <Container className="text-center pt-5">
+        <Spinner animation="border" />
+      </Container>
+    );
+  }
 
   return (
     <Container className="py-5">
@@ -69,46 +80,36 @@ const AdminPanel = () => {
       {/* Estatísticas */}
       <Row className="g-4 mb-4">
         <Col md={4}>
-          <Card>
-            <Card.Body>
-              <h6><Users size={16} className="me-2" />Usuários</h6>
-              <h4 className="fw-bold">{stats?.totalUsuarios || '...'}</h4>
-            </Card.Body>
-          </Card>
+          <Card><Card.Body>
+            <h6><Users size={16} className="me-2" />Usuários</h6>
+            <h4 className="fw-bold">{stats?.totalUsuarios ?? '...'}</h4>
+          </Card.Body></Card>
         </Col>
         <Col md={4}>
-          <Card>
-            <Card.Body>
-              <h6><Filter size={16} className="me-2" />Ofertas</h6>
-              <h4 className="fw-bold">{stats?.totalOfertas || '...'}</h4>
-            </Card.Body>
-          </Card>
+          <Card><Card.Body>
+            <h6><Filter size={16} className="me-2" />Ofertas</h6>
+            <h4 className="fw-bold">{stats?.totalOfertas ?? '...'}</h4>
+          </Card.Body></Card>
         </Col>
         <Col md={4}>
-          <Card>
-            <Card.Body>
-              <h6><FileWarning size={16} className="me-2" />Pedidos</h6>
-              <h4 className="fw-bold">{stats?.totalPedidos || '...'}</h4>
-            </Card.Body>
-          </Card>
+          <Card><Card.Body>
+            <h6><FileWarning size={16} className="me-2" />Pedidos</h6>
+            <h4 className="fw-bold">{stats?.totalPedidos ?? '...'}</h4>
+          </Card.Body></Card>
         </Col>
       </Row>
+
+      <AdminDashboardStats />
 
       {/* Aba de gerenciamento */}
       <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-3">
         <Tab eventKey="usuarios" title="Usuários">
           <Table responsive bordered hover>
             <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Tipo</th>
-                <th>Cidade</th>
-                <th>Ações</th>
-              </tr>
+              <tr><th>Nome</th><th>Email</th><th>Tipo</th><th>Cidade</th><th>Ações</th></tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {users.map(u => (
                 <tr key={u.id}>
                   <td>{u.nome}</td>
                   <td>{u.email}</td>
@@ -127,16 +128,10 @@ const AdminPanel = () => {
         <Tab eventKey="ofertas" title="Ofertas">
           <Table responsive bordered hover>
             <thead>
-              <tr>
-                <th>Título</th>
-                <th>Descrição</th>
-                <th>Tipo</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
+              <tr><th>Título</th><th>Descrição</th><th>Tipo</th><th>Status</th><th>Ações</th></tr>
             </thead>
             <tbody>
-              {offers.map((o) => (
+              {offers.map(o => (
                 <tr key={o.id}>
                   <td>{o.titulo}</td>
                   <td>{o.descricao}</td>
@@ -155,22 +150,18 @@ const AdminPanel = () => {
         <Tab eventKey="pedidos" title="Pedidos">
           <Table responsive bordered hover>
             <thead>
-              <tr>
-                <th>Título</th>
-                <th>Descrição</th>
-                <th>Tipo</th>
-                <th>Urgência</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
+              <tr><th>Título</th><th>Descrição</th><th>Tipo</th><th>Urgência</th><th>Status</th><th>Ações</th></tr>
             </thead>
             <tbody>
-              {requests.map((r) => (
+              {requests.map(r => (
                 <tr key={r.id}>
                   <td>{r.titulo}</td>
                   <td>{r.descricao}</td>
                   <td><Badge bg="info">{r.tipoAjuda}</Badge></td>
-                  <td><Badge bg={r.urgencia === 'ALTA' ? 'danger' : r.urgencia === 'MEDIA' ? 'warning' : 'secondary'}>{r.urgencia}</Badge></td>
+                  <td><Badge bg={
+                    r.urgencia === 'ALTA' ? 'danger' :
+                    r.urgencia === 'MEDIA' ? 'warning' : 'secondary'
+                  }>{r.urgencia}</Badge></td>
                   <td><Badge bg="secondary">{r.status}</Badge></td>
                   <td>
                     <Button variant="outline-warning" size="sm" onClick={() => handleModerate(r.id, 'pausar')}>Pausar</Button>{' '}
@@ -186,5 +177,6 @@ const AdminPanel = () => {
   );
 };
 
-export default AdminPanel;
+export default AdminPainel;
+
 

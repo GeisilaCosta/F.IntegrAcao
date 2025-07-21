@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Container, Row, Col, Card, Form, Button, Alert, Modal, Tab, Tabs
 } from 'react-bootstrap';
@@ -8,18 +8,20 @@ import {
 import { authService } from '../services/apiServices';
 import { userService } from '../services/apiServices';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 const AuthModal = ({ show, onHide, onAuthSuccess }) => {
   const [activeTab, setActiveTab] = useState('login');
   const [formData, setFormData] = useState({
-    email: '',
-    senha: '',
-    nome: '',
-    telefone: '',
-    endereco: '',
-    tipoUsuario: 'PESSOA_VULNERABILIDADE' // corrige alinhamento com backend
-  });
+  email: '',
+  senha: '',
+  nome: '',
+  telefone: '',
+  endereco: '',
+  tipo: '' // padrão inicial
+});
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +32,20 @@ const AuthModal = ({ show, onHide, onAuthSuccess }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const navigate = useNavigate();
+ const navigate = useNavigate();
+
+// 🧠 Função interna para traduzir mensagens de erro
+const translateError = (message) => {
+  if (!message) return 'Erro desconhecido.';
+  const msg = message.toLowerCase();
+
+  if (msg.includes('401')) return 'Email ou senha inválidos.';
+  if (msg.includes('403')) return 'Acesso negado. Você não tem permissão.';
+  if (msg.includes('500')) return 'Erro interno no servidor.';
+  if (msg.includes('timeout')) return 'Tempo de conexão expirado. Verifique sua internet.';
+  return message;
+};
+
 const handleLogin = async (e) => {
   e.preventDefault();
   setLoading(true);
@@ -42,78 +57,112 @@ const handleLogin = async (e) => {
       senha: formData.senha
     });
 
+    // ✅ Salvar token e dados do usuário
     localStorage.setItem('authToken', response.token);
+ localStorage.setItem('userInfo', JSON.stringify({
+  id: response.id,
+  tipo: response.tipo,
+  nome: response.nome
+}));
 
-    setSuccess('Login realizado com sucesso!');
-    setTimeout(() => {
-      onAuthSuccess(response);
-      onHide();
 
-      // Redirecionamento com base no tipo
-      if (response.tipo === 'PESSOA_VULNERABILIDADE') {
-        navigate('/painel-vulneravel');
-      } else if (response.tipo === 'APOIADOR_VOLUNTARIO') {
-        navigate('/painel-apoiador');
-      } else {
-        navigate('/painel-geral'); // Fallback, se quiser
-      }
-    }, 1000);
+console.log('🔁 Resposta completa do backend:', response);
+
+    console.log('🔐 Token:', localStorage.getItem('authToken'));
+    console.log('👤 Dados:', localStorage.getItem('userInfo'));
+
+    // ✅ Redirecionamento com base no tipo recebido
+const tipoNormalizado = response.tipoUsuario?.trim()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toUpperCase();
+
+switch (tipoNormalizado) {
+  case 'VULNERAVEL':
+    toast.success(`👋 Olá, ${response.nome}! Esperamos te ajudar no que precisar.`);
+    navigate('/painel-vulneravel');
+    break;
+
+  case 'APOIADOR':
+    toast.success(`🙌 Bem-vindo(a), ${response.nome}! Sua solidariedade transforma vidas.`);
+    navigate('/painel-apoiador');
+    break;
+
+  case 'ADMINISTRADOR':
+    toast.success(`🎉 Bem-vindo, ${response.nome}! Painel administrativo acessado com sucesso.`);
+    navigate('/painel-interno-secreto');
+    break;
+
+  default:
+    setError('Tipo de usuário não reconhecido.');
+    return;
+}
+
+
+    // ✅ Atualiza estado no App e fecha modal
+    onAuthSuccess(response);
+    onHide();
   } catch (error) {
-    setError('Email ou senha incorretos. Tente novamente.');
+    const message = error.response?.data?.message || error.message || 'Erro desconhecido.';
+    setError(translateError(message));
   } finally {
     setLoading(false);
   }
 };
 
+const handleRegister = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  setSuccess('');
 
-  
+  try {
+    const response = await authService.register({
+      nome: formData.nome,
+      email: formData.email,
+      senha: formData.senha,
+      telefone: formData.telefone,
+      endereco: formData.endereco,
+     tipoUsuario: formData.tipo
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .trim()
+  .toUpperCase()
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await authService.register({
-        nome: formData.nome,
-        email: formData.email,
-        senha: formData.senha,
-        telefone: formData.telefone,
-        endereco: formData.endereco,
-        tipo: formData.tipoUsuario // o backend espera "tipo", não "tipoUsuario"
-      });
-
-      setSuccess('Cadastro realizado com sucesso! Faça login para continuar.');
-      setTimeout(() => {
-        setActiveTab('login');
-        setFormData(prev => ({
-          ...prev,
-          nome: '', telefone: '', endereco: ''
-        }));
-      }, 2000);
-    } catch (error) {
-      setError('Erro ao criar conta. Verifique os dados e tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      email: '',
-      senha: '',
-      nome: '',
-      telefone: '',
-      endereco: '',
-      tipoUsuario: 'PESSOA_VULNERABILIDADE'
     });
-    setError('');
-    setSuccess('');
-  };
 
-  useEffect(() => {
-    if (show) resetForm();
-  }, [show]);
+    setSuccess(`✅ ${response.nome}, seu cadastro foi criado com sucesso!`);
+
+    // limpa campos e troca para aba login
+    setTimeout(() => {
+      setActiveTab('login');
+      resetForm();
+    }, 2000);
+  } catch (error) {
+    const message = error.response?.data?.message || error.message;
+    setError(`⚠️ ${message.includes('409') ? 'Email já cadastrado.' : 'Erro ao registrar. Verifique os campos.'}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const resetForm = useCallback(() => {
+  setFormData({
+    email: '',
+    senha: '',
+    nome: '',
+    telefone: '',
+    endereco: '',
+    tipo: ''
+  });
+  setError('');
+  setSuccess('');
+}, []);
+
+useEffect(() => {
+  if (show) resetForm();
+}, [show, resetForm]);
+
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
@@ -257,16 +306,17 @@ const handleLogin = async (e) => {
                 <Col md={12}>
   <Form.Group className="mb-3">
     <Form.Label>Tipo de Usuário</Form.Label>
-    <Form.Select
-      name="tipo" // ← nome deve ser "tipo" para bater com o backend
-      value={formData.tipo}
-      onChange={handleInputChange}
-      required
-    >
-      <option value="">Selecione seu perfil</option>
-      <option value="PESSOA_VULNERABILIDADE">Pessoa em Vulnerabilidade</option>
-      <option value="APOIADOR_VOLUNTARIO">Apoiador/Voluntário</option>
-    </Form.Select>
+ <Form.Select
+  name="tipo"
+  value={formData.tipo}
+  onChange={handleInputChange}
+>
+  <option value="">Selecione seu perfil</option>
+  <option value="VULNERÁVEL">Pessoa em Vulnerabilidade</option>
+  <option value="APOIADOR">Apoiador/Voluntário</option>
+</Form.Select>
+
+
     <Form.Text className="text-muted">
       Escolha "Pessoa em Vulnerabilidade" se precisa de ajuda, ou "Apoiador" se quer ajudar outros.
     </Form.Text>

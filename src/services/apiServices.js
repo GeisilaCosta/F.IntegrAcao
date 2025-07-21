@@ -1,22 +1,21 @@
 import API_CONFIG, { apiRequest } from '../config/api';
 
-
-
 // Serviços de Autenticação
 export const authService = {
   login: async (credentials) => {
-    return apiRequest(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
-      method: 'POST',
-      body: credentials
-    });
-  },
-  
+  return apiRequest(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
+    method: 'POST',
+    body: credentials
+  });
+},
+
   register: async (userData) => {
-    return apiRequest(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
-      method: 'POST',
-      body: userData
-    });
-  },
+  return apiRequest(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
+    method: 'POST',
+    body: userData
+  });
+}
+,
   
   logout: async () => {
     const result = await apiRequest(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {
@@ -39,12 +38,14 @@ export const userService = {
     return apiRequest(API_CONFIG.ENDPOINTS.USERS.PROFILE);
   },
   
-  updateProfile: async (userData) => {
-    return apiRequest(API_CONFIG.ENDPOINTS.USERS.UPDATE, {
-      method: 'PUT',
-      body: userData
-    });
-  },
+ updateProfile: async (userData) => {
+  return apiRequest(API_CONFIG.ENDPOINTS.USERS.UPDATE, {
+    method: 'PUT',
+    body: userData
+  });
+}
+,
+
   
   getUsers: async (params = {}) => {
     return apiRequest(API_CONFIG.ENDPOINTS.USERS.LIST, { params });
@@ -187,15 +188,19 @@ export const adminService = {
   getStatistics: async () => {
     return apiRequest(API_CONFIG.ENDPOINTS.ADMIN.STATS);
   },
-  
+
+  getDashboardStats: async () => {
+    return apiRequest(API_CONFIG.ENDPOINTS.ADMIN.STATS); // ou direto '/admin/estatisticas'
+  },
+
   getUsers: async (params = {}) => {
     return apiRequest(API_CONFIG.ENDPOINTS.ADMIN.USERS, { params });
   },
-  
+
   getReports: async (params = {}) => {
     return apiRequest(API_CONFIG.ENDPOINTS.ADMIN.REPORTS, { params });
   },
-  
+
   moderateContent: async (contentId, action) => {
     return apiRequest(API_CONFIG.ENDPOINTS.ADMIN.MODERATE, {
       method: 'POST',
@@ -203,6 +208,8 @@ export const adminService = {
     });
   }
 };
+
+
 
 export const pedidoService = {
   listarMeusPedidos: async () => {

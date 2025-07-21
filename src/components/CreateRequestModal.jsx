@@ -25,20 +25,31 @@ const CreateRequestModal = ({ show, onHide, userId, onSuccess }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      await requestService.createRequest({ ...formData, usuarioVulneravelId: userId });
-      onSuccess();
-      onHide();
-    } catch (err) {
-      setError('Erro ao criar pedido. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
+ const handleSubmit = async e => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+
+  try {
+    await requestService.createRequest({
+      titulo: formData.titulo,
+      descricao: formData.descricao,
+      tiposAjuda: formData.tipoAjuda,        // ✔️ alinhado com enum TiposAjuda
+      tiposUrgencia: formData.urgencia,      // ✔️ enum TiposUrgencia
+      endereco: formData.localizacao,        // ✔️ corresponde ao campo da entidade
+
+      // relacionamentos
+      usuario: { id: userId }                
+    });
+
+    onSuccess();
+    onHide();
+  } catch (err) {
+    setError('Erro ao criar pedido. Tente novamente.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Modal show={show} onHide={onHide} centered>

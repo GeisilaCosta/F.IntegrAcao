@@ -34,7 +34,7 @@ const PainelApoiador = () => {
 
   return (
     <Container className="mt-4">
-      <h2><HeartHandshake className="me-2" size={32} /> Painel do Voluntário</h2>
+      <h2><HeartHandshake className="me-2" size={32} /> Painel do Apoiador</h2>
 
       {/* Pedidos disponíveis */}
       <Card className="my-4">
@@ -93,6 +93,8 @@ const PainelApoiador = () => {
         </Toast.Header>
         <Toast.Body>Há um pedido de ajuda que se encaixa na sua área de atuação!</Toast.Body>
       </Toast>
+
+      
     </Container>
   );
 };

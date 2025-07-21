@@ -96,6 +96,8 @@ const PainelVulneravel = () => {
         </Toast.Header>
         <Toast.Body>Um voluntário aceitou seu pedido de ajuda! 💙</Toast.Body>
       </Toast>
+
+      
     </Container>
   );
 };
