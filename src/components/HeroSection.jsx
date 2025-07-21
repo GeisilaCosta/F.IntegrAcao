@@ -140,7 +140,7 @@ const HeroSection = ({ onShowAuth }) => {
                   <div className="text-center">
                     <motion.div 
                       className="bg-white bg-opacity-20 rounded-circle p-4 mb-3 mx-auto" 
-                      style={{ width: '160px', height: '160px' }}
+                      style={{ width: '170px', height: '160px' }}
                       variants={pulseVariants}
                       animate="animate"
                     >
