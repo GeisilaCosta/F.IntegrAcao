@@ -23,20 +23,28 @@ const CreateOfferModal = ({ show, onHide, userId, onSuccess }) => {
   };
 
   const handleSubmit = async e => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      await offerService.createOffer({ ...formData, apoiadorId: userId });
-      onSuccess(); // para recarregar o dashboard
-      onHide();
-    } catch (err) {
-      setError('Erro ao criar oferta. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await offerService.createOffer({
+      titulo: formData.titulo,
+      descricao: formData.descricao,
+      tiposAjuda: formData.tipoAjuda,       // ✅ nome correto no backend
+      endereco: formData.localizacao,       // ✅ corresponde ao campo 'endereco' da entidade
+      usuario: { id: userId }               // ✅ associa o apoiador à oferta
+    });
+
+    onSuccess(); // ✅ dispara recarregamento ou alerta de sucesso
+    onHide();    // ✅ fecha o modal
+  } catch (err) {
+    setError('Erro ao criar oferta. Tente novamente.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Modal show={show} onHide={onHide} centered>

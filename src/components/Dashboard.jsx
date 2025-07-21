@@ -100,40 +100,39 @@ const Dashboard = ({ user, onLogout }) => {
       return matchesSearch && matchesType;
     });
   };
+const renderOfferCard = (offer, showActions = true) => {
+  const podeCandidatar = showActions &&
+    user?.tipo === 'VULNERAVEL' &&
+    offer.status === 'ATIVO';
 
-  const renderOfferCard = (offer, showActions = true) => (
+  return (
     <Card key={offer.id} className="mb-3 h-100">
       <Card.Body>
+        {/* Cabeçalho com título e tipo */}
         <div className="d-flex justify-content-between align-items-start mb-2">
           <h6 className="fw-bold mb-0">{offer.titulo}</h6>
           <Badge bg={getTypeColor(offer.tipoAjuda)}>
             {offer.tipoAjuda}
           </Badge>
         </div>
-        
+
+        {/* Descrição */}
         <p className="text-muted mb-3">{offer.descricao}</p>
-        
+
+        {/* Informações adicionais */}
         <div className="d-flex align-items-center gap-3 mb-3 small text-muted">
-          <span>
-            <MapPin size={14} className="me-1" />
-            {offer.localizacao}
-          </span>
-          <span>
-            <Clock size={14} className="me-1" />
-            {formatDate(offer.dataPublicacao)}
-          </span>
-          <span>
-            <User size={14} className="me-1" />
-            {offer.apoiador?.nome}
-          </span>
+          <span><MapPin size={14} className="me-1" /> {offer.localizacao}</span>
+          <span><Clock size={14} className="me-1" /> {formatDate(offer.dataPublicacao)}</span>
+          <span><User size={14} className="me-1" /> {offer.apoiador?.nome}</span>
         </div>
 
+        {/* Status e ação */}
         <div className="d-flex justify-content-between align-items-center">
           <Badge bg={getStatusColor(offer.status)}>
             {offer.status}
           </Badge>
-          
-          {showActions && user.tipoUsuario === 'VULNERAVEL' && (
+
+          {podeCandidatar && (
             <Button
               size="sm"
               variant="outline-primary"
@@ -147,6 +146,8 @@ const Dashboard = ({ user, onLogout }) => {
       </Card.Body>
     </Card>
   );
+};
+
 
   const renderRequestCard = (request, showActions = true) => (
     <Card key={request.id} className="mb-3 h-100">
@@ -185,7 +186,7 @@ const Dashboard = ({ user, onLogout }) => {
             {request.status}
           </Badge>
           
-          {showActions && user.tipoUsuario === 'APOIADOR' && (
+          {showActions && user.tipo === 'APOIADOR' && (
             <Button
               size="sm"
               variant="outline-success"
@@ -297,7 +298,7 @@ const Dashboard = ({ user, onLogout }) => {
         </Col>
       </Row>
 
-      {user.tipoUsuario === 'APOIADOR_VOLUNTARIO' ? (
+      {user.tipoUsuario === 'APOIADOR' ? (
   <CreateOfferModal
     show={showCreateModal}
     onHide={() => setShowCreateModal(false)}

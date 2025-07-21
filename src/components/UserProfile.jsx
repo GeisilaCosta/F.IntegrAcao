@@ -37,23 +37,31 @@ const UserProfile = ({ user, onUpdate }) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const updated = await userService.updateProfile(formData);
-      localStorage.setItem('userInfo', JSON.stringify(updated));
-      setSuccess('Perfil atualizado com sucesso!');
-      onUpdate(updated);
-      setShowModal(false);
-    } catch (err) {
-      setError('Erro ao atualizar perfil. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    nome: formData.nome,
+    telefone: formData.telefone,
+    endereco: `${formData.cidade || ''}, ${formData.estado || ''}`.trim()
   };
+
+  try {
+    const updated = await userService.updateProfile(payload);
+    localStorage.setItem('userInfo', JSON.stringify(updated));
+    setSuccess('Perfil atualizado com sucesso!');
+    onUpdate(updated); // Atualiza os dados no componente pai
+    setShowModal(false); // Fecha o modal
+  } catch (err) {
+    console.error('Erro ao atualizar perfil:', err);
+    setError('Erro ao atualizar perfil. Tente novamente.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>

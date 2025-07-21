@@ -4,11 +4,17 @@ import { useTranslation } from 'react-i18next';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './i18n';
+import { ToastContainer } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+
+
 
 // Modais e páginas
 import AuthModal from './components/AuthModal';
-import PrivateRoute from './components/PrivateRoute';
 import ChatIntegration from './components/ChatIntegration';
+import { AuthProvider } from './components/AuthContext';
+import PrivateRoute from './components/PrivateRoutes';
+
 
 
 // Landing page componentes
@@ -23,7 +29,7 @@ import Footer from './components/Footer';
 
 // Páginas protegidas
 import Dashboard from './components/Dashboard';
-import AdminPanel from './components/AdminPanel';
+import AdminPainel from './components/AdminPainel';
 import PainelVulneravel from './components/PainelVulneravel';
 import PainelApoiador from './components/PainelApoiador';
 
@@ -32,25 +38,33 @@ function App() {
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const userInfo = localStorage.getItem('userInfo');
+useEffect(() => {
+  const token = localStorage.getItem('authToken');
+  const userInfo = localStorage.getItem('userInfo');
 
-    if (token && userInfo) {
-      try {
-        setUser(JSON.parse(userInfo));
-      } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userInfo');
-      }
+  if (token && userInfo) {
+    try {
+      setUser(JSON.parse(userInfo)); // 👈 resultado: user.tipo disponível
+    } catch (error) {
+      console.error('Erro ao carregar dados do usuário:', error);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userInfo');
     }
-  }, []);
+  }
+}, []);
 
-  const handleAuthSuccess = (authData) => {
-    setUser(authData.userInfo);
-    setShowAuthModal(false);
-  };
+
+// App.jsx
+const handleAuthSuccess = () => {
+  const info = JSON.parse(localStorage.getItem('userInfo'));
+  setUser(info);
+
+  if (info.tipoUsuario === 'ADMINISTRADOR') {
+    window.location.href = '/painel-interno-secreto'; // 🎯 redireciona para admin
+  }
+};
+
+
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -82,30 +96,25 @@ function App() {
   );
 
   return (
-    <Router>
-      <Routes>
-        {/* Página inicial */}
-        <Route path="/" element={<LandingPageView />} />
-        <Route path="/unauthorized" element={<div className="p-5 text-center"><h4>Acesso não autorizado</h4></div>} />
 
-        {/* Rotas protegidas para usuários autenticados */}
-        <Route element={<PrivateRoute isAuthenticated={isAuthenticated} />}>
-          <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
-          <Route path="/chat" element={<ChatIntegration />} />
-          <Route path="/painel-vulneravel" element={<PainelVulneravel />} />
-          <Route path="/painel-apoiador" element={<PainelApoiador />} />
+  <>
+    <ToastContainer position="top-right" autoClose={3000} />
 
-        </Route>
+    <Routes>
+      {/* Página inicial */}
+      <Route path="/" element={<LandingPageView />} />
+      <Route path="/unauthorized" element={<div className="p-5 text-center"><h4>Acesso não autorizado</h4></div>} />
+      <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+      <Route path="/chat" element={<ChatIntegration />} />
+      <Route path="/painel-vulneravel" element={<PainelVulneravel />} />
+      <Route path="/painel-apoiador" element={<PainelApoiador />} />
+      <Route path="/painel-interno-secreto" element={<AdminPainel />} />
 
-        {/* Rotas restritas para administradores */}
-        <Route element={<PrivateRoute isAuthenticated={isAuthenticated} allowedRoles={['ADMINISTRADOR']} />}>
-          <Route path="/admin" element={<AdminPanel />} />
-        </Route>
+      {/* Rota fallback */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  </>
 
-        {/* Rota fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Router>
   );
 }
 
